@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %} 
+    {% for category, message in messages %}
+    {% if category == 'success' %}
+        <div class="notification is-success">{{ message }}</div>
+    {% else %}
+        <div class="notification is-danger">{{ message }}</div>
+    {% endif %}
+    {% endfor %}
+{% endwith %}
+    <h1 class="title">Welcome, {{ user.name }}!</h1>
+    <div class="box">
+        <form method="POST" action="/company_details">
+            <fieldset>
+                <legend>Company Details</legend>
+                <div class="control">
+                    <input class="input is-large" type="text" name="company_name" placeholder="Company Name" autofocus="" value="{% if user.company_name is not none %}{{ user.company_name }}{% endif %}"/>
+                    <input class="input is-large" type="text" name="company_representative" placeholder="Company Representative" autofocus="" value="{% if user.company_representative is not none %}{{ user.company_representative }}{% endif %}"/>
+                    <input class="input is-large" type="text" name="company_address" placeholder="Company Address" autofocus="" value="{% if user.company_address is not none %}{{ user.company_address }}{% endif %}"/>
+                    <input class="input is-large" type="text" name="company_mobile" placeholder="Company Mobile" autofocus="" value="{% if user.company_mobile is not none %}{{ user.company_mobile }}{% endif %}"/>
+                    <input class="input is-large" type="text" name="company_landline" placeholder="Company Landline" autofocus="" value="{% if user.company_landline is not none %}{{ user.company_landline }}{% endif %}"/>
+                    <input class="input is-large" type="email" name="company_email" placeholder="Company Email" autofocus="" value="{% if user.company_email is not none %}{{ user.company_email }}{% endif %}"/>
+                    <input class="input is-large" type="text" name="company_identification_number" placeholder="Company Identification Number" autofocus="" value="{% if user.company_identification_number is not none %}{{ user.company_identification_number }}{% endif %}"/>
+                    <input class="input is-large" type="text" name="company_method_of_yield" placeholder="Method of Yield Calculation (e.g., Open Solar, PVSyst)" value="{% if user.company_method_of_yield is not none %}{{ user.company_method_of_yield }}{% endif %}"/>
+                </div>
+            </fieldset>
+            <button class="button is-block is-info is-large is-fullwidth" type="submit">Save</button>
+        </form>
+    </div>
+    <a href="{{ url_for('auth.delete') }}" class="button is-danger">Delete Account</a>
+{% endblock %}

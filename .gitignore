@@ -1,0 +1,6 @@
+.prettierignore
+.prettierrc
+project/__pycache__
+env
+.env
+instance
