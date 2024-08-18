@@ -19,12 +19,12 @@
             <div id="navbarMenuHeroA" class="navbar-menu is-active">
               <div class="navbar-start">
                 <a href="{{ url_for('index') }}" class="navbar-item top-left-text">
-                  Simple Solar
+                  Swisscharge
                 </a>
               </div>
               <div class="navbar-end">
                 {% if current_user.is_authenticated %}
-                  <a href="{{ url_for('company_details') }}" class="navbar-item">Company Details</a>
+                  <a href="{{ url_for('profile') }}" class="navbar-item">Profile</a>
                   <a href="{{ url_for('auth.logout') }}" class="navbar-item">Logout</a>
                 {% endif %} 
 

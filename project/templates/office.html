@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %} 
+    {% for category, message in messages %}
+    {% if category == 'success' %}
+        <div class="notification is-success">{{ message }}</div>
+    {% else %}
+        <div class="notification is-danger">{{ message }}</div>
+    {% endif %}
+    {% endfor %}
+{% endwith %}
+    
+<div class="button-container">
+    {% for room in rooms %}
+        <a href="/room?room_id={{room.id}}" class="button is-primary is-large button-left">{{ room.name }}</a>
+    {% endfor %}
+</div>
+{% endblock %}

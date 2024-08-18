@@ -3,9 +3,16 @@
 <body class="index-page">
 <div class="column is-4 is-offset-4">
   <div class="has-text-centered">
-    <h1 class="title is-3" {% if current_user.is_authenticated %}style="visibility: hidden;"{% endif %}>Book a Desk or Parking Spot</h1>
+    <h1 class="title is-3">
+      {% if not current_user.is_authenticated %}
+      Please create an account or login.
+      {% else %}
+      Select an Office Location
+      {% endif %}
+      <br>
+    </h1>
   </div>
-    <!-- <div class="box"> -->
+    <div class="box">
         {% with messages = get_flashed_messages(with_categories=true) %} 
           {% for category, message in messages %}
             {% if category == 'success' %}
@@ -20,8 +27,13 @@
           <a href="{{ url_for('auth.signup') }}" class="button is-block is-primary is-large is-halfwidth">Sign Up</a>
           <br>
           <a href="{{ url_for('auth.login') }}" class="button is-block is-secondary is-large is-halfwidth">Login</a>
+        {% else %}
+          {% for office in offices %}
+          <a href="/office?name={{office.name}}" class="button is-block is-primary is-large is-halfwidth">{{ office.name }}</a>
+          <br>
+          {% endfor %}
         {% endif %}   
-    <!-- </div> -->
+    </div>
 </div>
 </div>
 {% endblock %}

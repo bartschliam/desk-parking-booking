@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ room.name }}</h1>
+
+
+
+<script>
+    function bookDesk(deskId) {
+        // Implement the booking functionality here
+        console.log("Booking desk with ID:", deskId);
+        // You might redirect to a booking page or show a modal
+        window.location.href = `/book_desk?desk_id=${deskId}`;
+    }
+</script>
+
+{% endblock %}

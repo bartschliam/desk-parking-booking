@@ -18,9 +18,9 @@ def create_app():
             SQLALCHEMY_DATABASE_URI=database_uri,
             SQLALCHEMY_TRACK_MODIFICATIONS=False
         )
-
+    else:
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
     app.config['SECRET_KEY'] = 'secret-key-goes-here'
-    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 
     db.init_app(app)
 

@@ -9,7 +9,7 @@ from .__init__ import db
 from .__init__ import create_app
 import stripe
 from dotenv import load_dotenv
-from .models import User, Feedback
+from .models import User, Feedback, Office, Room, Desk
 import re
 from sqlalchemy import desc, func
 
@@ -39,55 +39,73 @@ application = app
 @app.route('/')
 def index():
     session['flash_messages'] = []
-    return render_template('index.html')
+    offices = Office.query.all()
+    return render_template('index.html', offices=offices)
 
 
-@app.route('/company_details', methods=['GET', 'POST'])
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
-def company_details():
+def profile():
     if request.method == 'POST':
-        company_name = request.form.get('company_name')
-        company_address = request.form.get('company_address')
-
-        existing_company = User.query.filter_by(company_name=company_name).first()
-        existing_address = User.query.filter_by(company_address=company_address).first()
-        if existing_company and existing_address and existing_company.id == existing_address.id and existing_company.id != current_user.id:
-            session['flash_messages'].append(('That company name and address already exist.', 'danger'))
+        email = request.form.get('email')
+        existing_email = User.query.filter_by(email=email).first()
+        if existing_email and existing_email.id != current_user.id:
+            session['flash_messages'].append(('That email already exist.', 'danger'))
         else:
-            company_representative = request.form.get('company_representative')
-            company_mobile = request.form.get('company_mobile')
-            company_landline = request.form.get('company_landline')
-            company_email = request.form.get('company_email')
-            company_identification_number = request.form.get('company_identification_number')
-            company_method_of_yield = request.form.get('company_method_of_yield')
+            name = request.form.get('name')
 
-            current_user.company_name = company_name if company_name else ''
-            current_user.company_representative = company_representative if company_representative else ''
-            current_user.company_address = company_address if company_address else ''
-            current_user.company_mobile = company_mobile if company_mobile else ''
-            current_user.company_landline = company_landline if company_landline else ''
-            current_user.company_email = company_email if company_email else ''
-            current_user.company_identification_number = company_identification_number if company_identification_number else ''
-            current_user.company_method_of_yield = company_method_of_yield if company_method_of_yield else ''
+            current_user.name = name if name else ''
+            current_user.email = email if email else ''
             db.session.commit()
             session['flash_messages'].append(('Details Updated', 'success'))
         flash_messages()
-        return redirect(url_for('index'))
-    return render_template('company_details.html', user=current_user)
+        return redirect(url_for('profile'))
+    return render_template('profile.html', user=current_user)
+
+
+@app.route('/office', methods=['GET', 'POST'])
+@login_required
+def office():
+    office_name = request.args.get('name')
+    office_id = Office.query.filter_by(name=office_name).first().id
+    rooms = Room.query.filter_by(office_id=office_id).order_by(Room.id.asc()).all()
+    return render_template('office.html', rooms=rooms)
+
+
+@app.route('/room', methods=['GET', 'POST'])
+@login_required
+def room():
+    room_id = request.args.get('room_id')
+    room = Room.query.filter_by(id=room_id).first()
+    desks = Desk.query.filter_by(room_id=room_id).all()
+
+    return render_template('room.html', desks=desks, room=room)
+
+
+@app.route('/book_desk', methods=['GET', 'POST'])
+@login_required
+def book_desk():
+    return render_template('book_desk.html')
+
+
+@app.route('/book_parking', methods=['GET', 'POST'])
+@login_required
+def book_parking():
+    return render_template('book_parking.html')
 
 
 @app.route('/feedback', methods=['GET', 'POST'])
 def feedback():
     if request.method == 'POST':
-        company_name = request.form.get('company_name')
+        name = request.form.get('name')
         email_address = request.form.get('email_address')
         feedback_text = request.form.get('feedback')
 
-        if company_name and email_address and feedback_text:  # Check if all fields are filled
+        if name and email_address and feedback_text:  # Check if all fields are filled
             max_feedback_id = Feedback.query.order_by(desc(Feedback.id)).first()
             new_feedback = Feedback(
                 id=max_feedback_id.id + 1 if max_feedback_id else 1,
-                company_name=company_name,
+                name=name,
                 email_address=email_address,
                 feedback=feedback_text
             )
@@ -102,7 +120,7 @@ def feedback():
                 sender='simplesolar.ie@gmail.com',
                 recipients=['simplesolar.ie@gmail.com']
             )
-            msg.body = f"Company name: {company_name}\nEmail address: {email_address}\nFeedback: {feedback_text}"
+            msg.body = f"Company name: {name}\nEmail address: {email_address}\nFeedback: {feedback_text}"
             mail.send(msg)
             return redirect(url_for('feedback'))
         else:

@@ -19,6 +19,44 @@ class Feedback(db.Model):
     feedback = db.Column(db.String(10000))
 
 
+class Office(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+
+
+class Room(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    office_id = db.Column(db.Integer, db.ForeignKey('office.id'))
+    rows = db.Column(db.Integer)
+    columns = db.Column(db.Integer)
+
+
+class Desk(db.Model):
+    __tablename__ = 'desk'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    reserved = db.Column(db.Boolean)
+    reserved_by = db.Column(db.String(1000))
+    reserved_until_date = db.Column(db.Date)
+    reserved_until_time = db.Column(db.String(4))
+    row = db.Column(db.Integer)
+    column = db.Column(db.Integer)
+
+    room_id = db.Column(db.Integer, db.ForeignKey('room.id'))
+
+
+class Parking(db.Model):
+    __tablename__ = 'parking'
+    id = db.Column(db.Integer, primary_key=True)
+    reserved = db.Column(db.Boolean)
+    reserved_by = db.Column(db.String(1000))
+    reserved_until_date = db.Column(db.Date)
+    reserved_until_time = db.Column(db.String(4))
+
+    office_id = db.Column(db.Integer, db.ForeignKey('office.id'))
+
+
 '''
 from project import db, create_app, models
 db.create_all(app=create_app())
