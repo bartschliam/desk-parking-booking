@@ -82,13 +82,14 @@ def room():
     return render_template('room.html', desks=desks, room=room)
 
 
-@app.route('/book_desk', methods=['GET', 'POST'])
+@app.route('/desks', methods=['GET', 'POST'])
 @login_required
-def book_desk():
+def desks():
     desk_id = request.form.get('desk_id')
     date = request.form.get('date')
     time = request.form.get('time')
     permanent = 'permanent' in request.form
+    
     desk = Desk.query.filter_by(id=desk_id).first()
     desk.reserved = True
     desk.reserved_by = current_user.name
@@ -97,7 +98,8 @@ def book_desk():
     db.session.commit()
     session['flash_messages'].append(('Booking Successful', 'success'))
     flash_messages()
-    return render_template('book_desk.html')
+    desks = Desk.query.filter_by()
+    return render_template('desks.html')
 
 
 @app.route('/book_parking', methods=['GET', 'POST'])

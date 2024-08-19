@@ -44,6 +44,7 @@ class Desk(db.Model):
     y = db.Column(db.Integer)
 
     room_id = db.Column(db.Integer, db.ForeignKey('room.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
 class Parking(db.Model):
