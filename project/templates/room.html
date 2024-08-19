@@ -3,15 +3,21 @@
 {% block content %}
 <h1>{{ room.name }}</h1>
 
-
-
-<script>
-    function bookDesk(deskId) {
-        // Implement the booking functionality here
-        console.log("Booking desk with ID:", deskId);
-        // You might redirect to a booking page or show a modal
-        window.location.href = `/book_desk?desk_id=${deskId}`;
-    }
-</script>
+<div class="room-grid">
+    {% for i in range(1, room.rows + 1) %}
+        <div class="row">
+            {% for j in range(1, room.columns + 1) %}
+                {% set desk = desks|selectattr('x', 'equalto', i)|selectattr('y', 'equalto', j)|first %}
+                {% if desk %}
+                    <div class="grid-item desk">
+                        <button class="circular-button">Desk {{ desk.id }}</button>
+                    </div>
+                {% else %}
+                    <div class="grid-item empty"></div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
 
 {% endblock %}

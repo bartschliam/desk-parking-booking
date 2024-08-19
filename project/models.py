@@ -40,8 +40,8 @@ class Desk(db.Model):
     reserved_by = db.Column(db.String(1000))
     reserved_until_date = db.Column(db.Date)
     reserved_until_time = db.Column(db.String(4))
-    row = db.Column(db.Integer)
-    column = db.Column(db.Integer)
+    x = db.Column(db.Integer)
+    y = db.Column(db.Integer)
 
     room_id = db.Column(db.Integer, db.ForeignKey('room.id'))
 

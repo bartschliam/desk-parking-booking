@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from .models import User, Feedback, Office, Room, Desk
 import re
 from sqlalchemy import desc, func
+from PIL import Image
 
 load_dotenv()
 
@@ -74,17 +75,17 @@ def office():
 
 @app.route('/room', methods=['GET', 'POST'])
 @login_required
-def room():
+def room(): 
     room_id = request.args.get('room_id')
     room = Room.query.filter_by(id=room_id).first()
     desks = Desk.query.filter_by(room_id=room_id).all()
-
     return render_template('room.html', desks=desks, room=room)
 
 
 @app.route('/book_desk', methods=['GET', 'POST'])
 @login_required
 def book_desk():
+    
     return render_template('book_desk.html')
 
 
