@@ -9,8 +9,14 @@
             {% for j in range(1, room.columns + 1) %}
                 {% set desk = desks|selectattr('x', 'equalto', i)|selectattr('y', 'equalto', j)|first %}
                 {% if desk %}
-                    <div class="grid-item desk">
-                        <button class="circular-button">Desk {{ desk.id }}</button>
+                    <div class="grid-item {{ 'reserved' if desk.reserved else 'desk' }}">
+                        <button 
+                            class="circular-button" 
+                            onclick="openModal({{ desk.id }})"
+                            reserved_by="{{ desk.reserved_by if desk.reserved else 'Available' }}"
+                            reserved_until_date="{{ desk.reserved_until_date if desk.reserved_until_date else ''}}"
+                            >Desk {{ desk.id }}
+                        </button>
                     </div>
                 {% else %}
                     <div class="grid-item empty"></div>
@@ -19,5 +25,61 @@
         </div>
     {% endfor %}
 </div>
+
+<!-- Modal HTML -->
+<div id="bookingModal" class="modal">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeModal()">&times;</span>
+        <h2>Book Desk <span id="modal-desk-id"></span></h2>
+        <form id="bookingForm" method="POST" action="{{ url_for('book_desk') }}">
+            <input type="hidden" name="desk_id" id="modal-desk-id-input">
+            <div>
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+            <div>
+                <label for="time">Time:</label>
+                <input type="time" id="time" name="time" required>
+            </div>
+            <div>
+                <label for="permanent">
+                    <input type="checkbox" id="permanent" name="permanent">
+                    Permanent
+                </label>
+            </div>
+            <div>
+                <button type="submit">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    function openModal(deskId) {
+        // Set the desk ID
+        document.getElementById('modal-desk-id').textContent = deskId;
+        document.getElementById('modal-desk-id-input').value = deskId;
+
+        // Set default date and time
+        var today = new Date();
+        var date = today.toISOString().split('T')[0]; // YYYY-MM-DD
+        var time = today.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
+
+        document.getElementById('date').value = date;
+        document.getElementById('time').value = time;
+
+        // Show the modal
+        document.getElementById('bookingModal').style.display = 'block';
+    }
+
+    function closeModal() {
+        document.getElementById('bookingModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target === document.getElementById('bookingModal')) {
+            closeModal();
+        }
+    }
+</script>
 
 {% endblock %}

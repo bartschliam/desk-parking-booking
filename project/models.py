@@ -39,7 +39,7 @@ class Desk(db.Model):
     reserved = db.Column(db.Boolean)
     reserved_by = db.Column(db.String(1000))
     reserved_until_date = db.Column(db.Date)
-    reserved_until_time = db.Column(db.String(4))
+    reserved_until_time = db.Column(db.String(5))
     x = db.Column(db.Integer)
     y = db.Column(db.Integer)
 

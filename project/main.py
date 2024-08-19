@@ -85,7 +85,18 @@ def room():
 @app.route('/book_desk', methods=['GET', 'POST'])
 @login_required
 def book_desk():
-    
+    desk_id = request.form.get('desk_id')
+    date = request.form.get('date')
+    time = request.form.get('time')
+    permanent = 'permanent' in request.form
+    desk = Desk.query.filter_by(id=desk_id).first()
+    desk.reserved = True
+    desk.reserved_by = current_user.name
+    desk.reserved_until_date = datetime.strptime(date, '%Y-%m-%d').date()
+    desk.reserved_until_time = time
+    db.session.commit()
+    session['flash_messages'].append(('Booking Successful', 'success'))
+    flash_messages()
     return render_template('book_desk.html')
 
 
