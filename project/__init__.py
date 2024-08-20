@@ -47,16 +47,3 @@ def create_app():
     app.register_blueprint(main_blueprint)
 
     return app
-'''
-Export to csv
-psql "Connection string?options=endpoint%3Dep-long-hill-a2gyc3s6&sslmode=require"
-COPY public.user TO stdout DELIMITER ',' CSV HEADER;
-
-Import from csv
-psql "Connection string?options=endpoint%3Dep-long-hill-a2gyc3s6&sslmode=require"
-___copy public.user FROM 'C:/path/filename.csv' DELIMITER ',' CSV HEADER
-
-psql "postgresql://bartschliam:LRwbVHKIX6T9@ep-long-hill-a2gyc3s6.eu-central-1.aws.neon.tech/solar_db?options=endpoint%3Dep-long-hill-a2gyc3s6&sslmode=require"
-___copy public.panel FROM 'C:___Users___Liam Bartsch___Desktop___Relevant___Projects___solar___project___database___panel.csv' DELIMITER ',' CSV HEADER
-
-'''

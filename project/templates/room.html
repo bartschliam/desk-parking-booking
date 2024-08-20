@@ -14,7 +14,8 @@
                             class="circular-button" 
                             onclick="openModal({{ desk.id }})"
                             reserved_by="{{ desk.reserved_by if desk.reserved else 'Available' }}"
-                            reserved_until_date="{{ desk.reserved_until_date if desk.reserved_until_date else ''}}"
+                            start="{{ desk.start if desk.start else ''}}"
+                            end="{{ desk.end if desk.end else ''}}"
                             >Desk {{ desk.id }}
                         </button>
                     </div>
@@ -31,22 +32,21 @@
     <div class="modal-content">
         <span class="close-button" onclick="closeModal()">&times;</span>
         <h2>Book Desk <span id="modal-desk-id"></span></h2>
-        <form id="bookingForm" method="POST" action="{{ url_for('desks') }}">
+        <form id="bookingForm" method="POST" action="{{ url_for('room') }}?room_id={{room.id}}">
             <input type="hidden" name="desk_id" id="modal-desk-id-input">
+
+            <!-- Start Date-Time Picker -->
             <div>
-                <label for="date">Date:</label>
-                <input type="date" id="date" name="date" required>
+                <label for="start_datetime">Start Date and Time:</label>
+                <input type="datetime-local" id="start_datetime" name="start_datetime" required>
             </div>
+
+            <!-- End Date-Time Picker -->
             <div>
-                <label for="time">Time:</label>
-                <input type="time" id="time" name="time" required>
+                <label for="end_datetime">End Date and Time:</label>
+                <input type="datetime-local" id="end_datetime" name="end_datetime" required>
             </div>
-            <div>
-                <label for="permanent">
-                    <input type="checkbox" id="permanent" name="permanent">
-                    Permanent
-                </label>
-            </div>
+
             <div>
                 <button type="submit">Save</button>
             </div>
@@ -54,18 +54,48 @@
     </div>
 </div>
 <script>
+    function formatTimestamp(timestamp) {
+        if (!timestamp) return '';
+        var date = new Date(parseInt(timestamp) * 1000); // Convert from seconds to milliseconds
+        return date.toLocaleString(); // Format as a readable date and time string
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.circular-button').forEach(function(button) {
+            var startTimestamp = button.getAttribute('start');
+            var endTimestamp = button.getAttribute('end');
+
+            button.setAttribute('start', formatTimestamp(startTimestamp));
+            button.setAttribute('end', formatTimestamp(endTimestamp));
+        });
+    });
+
     function openModal(deskId) {
         // Set the desk ID
         document.getElementById('modal-desk-id').textContent = deskId;
         document.getElementById('modal-desk-id-input').value = deskId;
 
-        // Set default date and time
-        var today = new Date();
-        var date = today.toISOString().split('T')[0]; // YYYY-MM-DD
-        var time = today.toTimeString().split(' ')[0].substring(0, 5); // HH:MM
+        // Get the button element to update tooltips
+        var button = document.querySelector(`button[onclick="openModal(${deskId})"]`);
+        if (button) {
+            var startTimestamp = button.getAttribute('start');
+            var endTimestamp = button.getAttribute('end');
 
-        document.getElementById('date').value = date;
-        document.getElementById('time').value = time;
+            // Format timestamps and set data attributes
+            button.setAttribute('data-start', formatTimestamp(startTimestamp));
+            button.setAttribute('data-end', formatTimestamp(endTimestamp));
+        }
+
+        // Set default start date and time
+        var now = new Date();
+        var startDateTime = now.toISOString().substring(0, 16); // YYYY-MM-DDTHH:MM
+
+        // Default end time: 1 hour later
+        var endTime = new Date(now.getTime() + 60*60*1000);
+        var endDateTime = endTime.toISOString().substring(0, 16); // YYYY-MM-DDTHH:MM
+
+        document.getElementById('start_datetime').value = startDateTime;
+        document.getElementById('end_datetime').value = endDateTime;
 
         // Show the modal
         document.getElementById('bookingModal').style.display = 'block';
@@ -81,5 +111,6 @@
         }
     }
 </script>
+
 
 {% endblock %}

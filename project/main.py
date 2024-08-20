@@ -13,11 +13,10 @@ from .models import User, Feedback, Office, Room, Desk
 import re
 from sqlalchemy import desc, func
 from PIL import Image
+from apscheduler.schedulers.background import BackgroundScheduler
 
 load_dotenv()
-
 env_suffix = os.getenv('ENVIRONMENT')
-
 
 main = Blueprint('main', __name__)
 app = create_app()
@@ -30,6 +29,25 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 mail = Mail(app)
 application = app
+
+
+def clear_past_bookings():
+    with app.app_context():
+        now = int(datetime.now().timestamp())
+        desks = Desk.query.filter(Desk.end < now).all()
+        for desk in desks:
+            desk.reserved = False
+            desk.reserved_by = None
+            desk.start = None
+            desk.end = None
+            desk.user_id = None
+        db.session.commit()
+    return
+
+
+scheduler = BackgroundScheduler()
+job = scheduler.add_job(clear_past_bookings, 'cron', hour=0, minute=1)
+scheduler.start()
 # if __name__ == '__main__':
 #     app = create_app()
 #     app.run(host='0.0.0.0', debug=False)
@@ -75,8 +93,23 @@ def office():
 
 @app.route('/room', methods=['GET', 'POST'])
 @login_required
-def room(): 
+def room():
+    if request.method == 'POST':
+        desk_id = request.form.get('desk_id')
+        start = int(datetime.strptime(request.form.get('start_datetime'), '%Y-%m-%dT%H:%M').timestamp())
+        end = int(datetime.strptime(request.form.get('end_datetime'), '%Y-%m-%dT%H:%M').timestamp())
+        permanent = 'permanent' in request.form
+        desk = Desk.query.filter_by(id=desk_id).first()
+        desk.reserved = True
+        desk.reserved_by = current_user.name
+        desk.start = start
+        desk.end = end
+        desk.user_id = current_user.id
+        db.session.commit()
+        session['flash_messages'].append(('Booking Successful', 'success'))
+        flash_messages()
     room_id = request.args.get('room_id')
+
     room = Room.query.filter_by(id=room_id).first()
     desks = Desk.query.filter_by(room_id=room_id).all()
     return render_template('room.html', desks=desks, room=room)
@@ -85,21 +118,8 @@ def room():
 @app.route('/desks', methods=['GET', 'POST'])
 @login_required
 def desks():
-    desk_id = request.form.get('desk_id')
-    date = request.form.get('date')
-    time = request.form.get('time')
-    permanent = 'permanent' in request.form
-    
-    desk = Desk.query.filter_by(id=desk_id).first()
-    desk.reserved = True
-    desk.reserved_by = current_user.name
-    desk.reserved_until_date = datetime.strptime(date, '%Y-%m-%d').date()
-    desk.reserved_until_time = time
-    db.session.commit()
-    session['flash_messages'].append(('Booking Successful', 'success'))
-    flash_messages()
-    desks = Desk.query.filter_by()
-    return render_template('desks.html')
+    desks = Desk.query.filter_by(user_id=current_user.id).all()
+    return render_template('desks.html', desks=desks)
 
 
 @app.route('/book_parking', methods=['GET', 'POST'])

@@ -200,7 +200,7 @@ footer {
 }
 
 .circular-button:hover::after {
-  content: attr(reserved_by) " | " attr(reserved_until_date); /* Combine attributes */
+  content: attr(reserved_by) "\A" attr(start) "\A" attr(end); /* Use line breaks */
   position: absolute;
   bottom: 120%; /* Position above the button */
   left: 50%;
@@ -209,7 +209,7 @@ footer {
   color: white;
   padding: 5px;
   border-radius: 4px;
-  white-space: nowrap; /* Prevent line breaks */
+  white-space: pre-line; /* Prevent line breaks */
   font-size: 12px;
   z-index: 10;
   opacity: 0;

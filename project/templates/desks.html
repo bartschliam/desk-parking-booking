@@ -13,14 +13,44 @@
     <div class="box">
         <form method="POST" action="/desks">
             <fieldset>
-                <legend>Choose a desk</legend>
+                <legend>Booked desks</legend>
                 <div class="control">
-                    {% for office in offices %}
-                    
-                    {% endfor %}
+                    {% if desks %}
+                        <ul>
+                            {% for desk in desks %}
+                                <div>
+                                    <span id="desk-{{ desk.id }}" 
+                                        data-start="{{ desk.start }}" 
+                                        data-end="{{ desk.reserved_until_time }}">
+                                        Desk {{ desk.name }}: <span class="start-time"></span> - <span class="end-time"></span>
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>No desks booked.</p>
+                    {% endif %}
                 </div>
             </fieldset>
-            <button class="button is-block is-info is-large is-fullwidth" type="submit">Save</button>
         </form>
     </div>
 {% endblock %}
+<script>
+    function formatTimestamp(timestamp) {
+        var date = new Date(timestamp * 1000); // Convert from seconds to milliseconds
+        return date.toLocaleString(); // Format as a readable date and time string
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('[data-start]').forEach(function(element) {
+            var startTimestamp = element.getAttribute('data-start');
+            var endTimestamp = element.getAttribute('data-end');
+
+            var startTime = formatTimestamp(startTimestamp);
+            var endTime = formatTimestamp(endTimestamp);
+
+            element.querySelector('.start-time').textContent = startTime;
+            element.querySelector('.end-time').textContent = endTime;
+        });
+    });
+</script>

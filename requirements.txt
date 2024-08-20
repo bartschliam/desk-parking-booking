@@ -1,5 +1,6 @@
 aiofiles==23.2.1
 anyio==4.3.0
+APScheduler==3.10.4
 asgiref==3.8.1
 beautifulsoup4==4.12.3
 blinker==1.7.0
@@ -95,6 +96,7 @@ threadpoolctl==3.2.0
 traits==6.3.2
 typing_extensions==4.9.0
 tzdata==2023.4
+tzlocal==5.2
 update-checker==0.18.0
 urllib3==2.1.0
 uvicorn==0.29.0
