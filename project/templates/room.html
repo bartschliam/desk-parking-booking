@@ -1,7 +1,16 @@
 {% extends "base.html" %}
-
+{% with messages = get_flashed_messages(with_categories=true) %} 
+    {% for category, message in messages %}
+    {% if category == 'success' %}
+        <div class="notification is-success">{{ message }}</div>
+    {% else %}
+        <div class="notification is-danger">{{ message }}</div>
+    {% endif %}
+    {% endfor %}
+{% endwith %}
 {% block content %}
 <h1>{{ room.name }}</h1>
+<button onclick="goBack()" class="button is-secondary">Back</button>
 
 <div class="room-grid">
     {% for i in range(1, room.rows + 1) %}
@@ -16,7 +25,7 @@
                             reserved_by="{{ desk.reserved_by if desk.reserved else 'Available' }}"
                             start="{{ desk.start if desk.start else ''}}"
                             end="{{ desk.end if desk.end else ''}}"
-                            >Desk {{ desk.id }}
+                            >Desk {{ desk.name }}
                         </button>
                     </div>
                 {% else %}
@@ -57,7 +66,16 @@
     function formatTimestamp(timestamp) {
         if (!timestamp) return '';
         var date = new Date(parseInt(timestamp) * 1000); // Convert from seconds to milliseconds
-        return date.toLocaleString(); // Format as a readable date and time string
+        var options = { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false // Use 24-hour format
+        };
+        return date.toLocaleString(undefined, options); // Include the day of the week and use 24-hour format
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -86,12 +104,21 @@
             button.setAttribute('data-end', formatTimestamp(endTimestamp));
         }
 
-        // Set default start date and time
-        var now = new Date();
-        var startDateTime = now.toISOString().substring(0, 16); // YYYY-MM-DDTHH:MM
+        var localDate = new Date();
 
-        // Default end time: 1 hour later
-        var endTime = new Date(now.getTime() + 60*60*1000);
+        // Extract local time components
+        var year = localDate.getFullYear();
+        var month = String(localDate.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+        var day = String(localDate.getDate()).padStart(2, '0');
+        var hours = String(localDate.getHours()).padStart(2, '0');
+        var minutes = String(localDate.getMinutes()).padStart(2, '0');
+        var seconds = String(localDate.getSeconds()).padStart(2, '0');
+
+        // Format as YYYY-MM-DDTHH:MM
+        var startDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+        var endTime = new Date();
+        endTime.setUTCHours(23, 59, 0, 0);
         var endDateTime = endTime.toISOString().substring(0, 16); // YYYY-MM-DDTHH:MM
 
         document.getElementById('start_datetime').value = startDateTime;
@@ -109,6 +136,10 @@
         if (event.target === document.getElementById('bookingModal')) {
             closeModal();
         }
+    }
+
+    function goBack() {
+        window.history.back();
     }
 </script>
 

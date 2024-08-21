@@ -52,8 +52,8 @@ class Parking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     reserved = db.Column(db.Boolean)
     reserved_by = db.Column(db.String(1000))
-    reserved_until_date = db.Column(db.Date)
-    reserved_until_time = db.Column(db.String(4))
+    start = db.Column(db.Integer)
+    end = db.Column(db.Integer)
 
     office_id = db.Column(db.Integer, db.ForeignKey('office.id'))
 
