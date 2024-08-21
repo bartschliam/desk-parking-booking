@@ -1,20 +1,14 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, send_file, jsonify
 from flask_login import login_required, current_user
 from flask_mail import Mail, Message
-import requests
 import os
-import json
-from datetime import datetime, date, timedelta
+from datetime import datetime, time as dt_time
 from .__init__ import db
 from .__init__ import create_app
-import stripe
 from dotenv import load_dotenv
 from .models import User, Feedback, Office, Room, Desk, Parking
-import re
 from sqlalchemy import desc, func
-from PIL import Image
 from apscheduler.schedulers.background import BackgroundScheduler
-import pytz
 
 load_dotenv()
 env_suffix = os.getenv('ENVIRONMENT')
@@ -34,20 +28,27 @@ application = app
 
 def clear_past_bookings():
     with app.app_context():
-        now = int(datetime.now().timestamp())
-        desks = Desk.query.filter(Desk.end < now).all()
-        for desk in desks:
-            desk.reserved = False
-            desk.reserved_by = None
-            desk.start = None
-            desk.end = None
-            desk.user_id = None
-        db.session.commit()
+        now = datetime.now()
+        print(now)
+        current_time = now.time()
+        # Define the time range (07:00 to 18:00)
+        start_time = dt_time(7, 0)
+        end_time = dt_time(18, 0)
+        if start_time <= current_time <= end_time:
+            now_timestamp = int(now.timestamp())
+            desks = Desk.query.filter(Desk.end < now_timestamp).all()
+            for desk in desks:
+                desk.reserved = False
+                desk.reserved_by = None
+                desk.start = None
+                desk.end = None
+                desk.user_id = None
+            db.session.commit()
     return
 
 
 scheduler = BackgroundScheduler()
-job = scheduler.add_job(clear_past_bookings, 'cron', hour=0, minute=1)
+scheduler.add_job(clear_past_bookings, 'cron', minute='*/15')
 scheduler.start()
 # if __name__ == '__main__':
 #     app = create_app()
