@@ -100,6 +100,7 @@ def room():
         desk_id = request.form.get('desk_id')
         start = int(datetime.strptime(request.form.get('start_datetime'), '%Y-%m-%dT%H:%M').timestamp())
         end = int(datetime.strptime(request.form.get('end_datetime'), '%Y-%m-%dT%H:%M').timestamp())
+        print(datetime.strptime(request.form.get('start_datetime'), '%Y-%m-%dT%H:%M'), datetime.strptime(request.form.get('end_datetime'), '%Y-%m-%dT%H:%M'))
         permanent = 'permanent' in request.form
         desk = Desk.query.filter_by(id=desk_id).first()
         desk.reserved = True
