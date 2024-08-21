@@ -29,7 +29,6 @@ application = app
 def clear_past_bookings():
     with app.app_context():
         now = datetime.now()
-        print(now)
         current_time = now.time()
         # Define the time range (07:00 to 18:00)
         start_time = dt_time(7, 0)
