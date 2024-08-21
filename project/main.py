@@ -113,7 +113,8 @@ def room():
 
     room = Room.query.filter_by(id=room_id).first()
     desks = Desk.query.filter_by(room_id=room_id).all()
-    return render_template('room.html', desks=desks, room=room)
+    timezone = request.cookies.get('timezone', 'Europe/Zurich')
+    return render_template('room.html', desks=desks, room=room, timezone=timezone)
 
 
 @app.route('/desks', methods=['GET', 'POST'])
