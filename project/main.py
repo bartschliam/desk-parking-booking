@@ -9,7 +9,7 @@ from .__init__ import db
 from .__init__ import create_app
 import stripe
 from dotenv import load_dotenv
-from .models import User, Feedback, Office, Room, Desk
+from .models import User, Feedback, Office, Room, Desk, Parking
 import re
 from sqlalchemy import desc, func
 from PIL import Image
@@ -121,6 +121,13 @@ def room():
 def desks():
     desks = Desk.query.filter_by(user_id=current_user.id).all()
     return render_template('desks.html', desks=desks)
+
+
+@app.route('/bookings', methods=['GET', 'POST'])
+def bookings():
+    desks = Desk.query.filter_by(user_id=current_user.id).all()
+    parkings = Parking.query.filter_by(user_id=current_user.id).all()
+    return render_template('bookings.html', desks=desks, parkings=parkings)
 
 
 @app.route('/book_parking', methods=['GET', 'POST'])

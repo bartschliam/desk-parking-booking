@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %} 
+    {% for category, message in messages %}
+    {% if category == 'success' %}
+        <div class="notification is-success">{{ message }}</div>
+    {% else %}
+        <div class="notification is-danger">{{ message }}</div>
+    {% endif %}
+    {% endfor %}
+{% endwith %}
+
+<h1>My Bookings</h1>
+
+<h2>Desk Bookings</h2>
+{% if desks %}
+    <table class="table is-fullwidth is-striped">
+        <thead>
+            <tr>
+                <th>Desk</th>
+                <th>Room</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for desk in desks %}
+            <tr>
+                <td>{{ desk.name }}</td>
+                <td>{{ desk.room.name }}</td>
+                <td>{{ desk.start.strftime('%A, %d %B %Y, %H:%M') }}</td>
+                <td>{{ desk.end.strftime('%A, %d %B %Y, %H:%M') }}</td>
+                <td>
+                    <form action="{{ url_for('cancel_desk_booking', booking_id=desk.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this desk booking?');">
+                        <button type="submit" class="button is-danger">Cancel</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>You have no desk bookings.</p>
+{% endif %}
+
+<h2>Parking Bookings</h2>
+{% if parkings %}
+    <table class="table is-fullwidth is-striped">
+        <thead>
+            <tr>
+                <th>Parking Spot</th>
+                <th>Location</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for parking in parkings %}
+            <tr>
+                <td>{{ parking.name }}</td>
+                <td>{{ parking.office.name }}</td>
+                <td>{{ parking.start.strftime('%A, %d %B %Y, %H:%M') }}</td>
+                <td>{{ parking.end.strftime('%A, %d %B %Y, %H:%M') }}</td>
+                <td>
+                    <form action="{{ url_for('cancel_parking_booking', booking_id=parking.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this parking booking?');">
+                        <button type="submit" class="button is-danger">Cancel</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>You have no parking bookings.</p>
+{% endif %}
+
+{% endblock %}

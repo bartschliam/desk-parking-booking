@@ -68,7 +68,7 @@ def signup():
         db.session.commit()
         flash(f'Successfully signed up with email: {email}', 'success')
         login_user(new_user)
-        return redirect(url_for('company_details'))
+        return redirect(url_for('profile'))
     return render_template('signup.html', subscription=subscription)
 
 

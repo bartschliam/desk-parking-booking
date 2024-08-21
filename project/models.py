@@ -44,18 +44,21 @@ class Desk(db.Model):
     y = db.Column(db.Integer)
 
     room_id = db.Column(db.Integer, db.ForeignKey('room.id'))
+    office_id = db.Column(db.Integer, db.ForeignKey('office.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
 class Parking(db.Model):
     __tablename__ = 'parking'
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
     reserved = db.Column(db.Boolean)
     reserved_by = db.Column(db.String(1000))
     start = db.Column(db.Integer)
     end = db.Column(db.Integer)
 
     office_id = db.Column(db.Integer, db.ForeignKey('office.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
 '''
