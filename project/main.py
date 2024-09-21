@@ -47,7 +47,7 @@ def clear_past_bookings():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(clear_past_bookings, 'cron', minute='*/15')
+scheduler.add_job(clear_past_bookings, 'cron', minute='*/60')
 scheduler.start()
 # if __name__ == '__main__':
 #     app = create_app()
@@ -97,8 +97,8 @@ def office():
 def room():
     if request.method == 'POST':
         desk_id = request.form.get('desk_id')
-        start = int(datetime.strptime(request.form.get('start_datetime'), '%Y-%m-%dT%H:%M').timestamp())
-        end = int(datetime.strptime(request.form.get('end_datetime'), '%Y-%m-%dT%H:%M').timestamp())
+        start = int(datetime.strptime(request.form.get('start'), '%Y-%m-%dT%H:%M').timestamp())
+        end = int(datetime.strptime(request.form.get('end'), '%Y-%m-%dT%H:%M').timestamp())
         permanent = 'permanent' in request.form
         desk = Desk.query.filter_by(id=desk_id).first()
         desk.reserved = True

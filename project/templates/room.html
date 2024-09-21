@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% with messages = get_flashed_messages(with_categories=true) %} 
+{% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
     {% if category == 'success' %}
         <div class="notification is-success">{{ message }}</div>
@@ -43,17 +43,18 @@
         <h2>Book Desk <span id="modal-desk-id"></span></h2>
         <form id="bookingForm" method="POST" action="{{ url_for('room') }}?room_id={{room.id}}">
             <input type="hidden" name="desk_id" id="modal-desk-id-input">
+            <input type="hidden" name="timezone" id="user-timezone">
 
             <!-- Start Date-Time Picker -->
             <div>
-                <label for="start_datetime">Start Date and Time:</label>
-                <input type="datetime-local" id="start_datetime" name="start_datetime" required>
+                <label for="start">Start Date and Time:</label>
+                <input type="datetime-local" id="start" name="start" required>
             </div>
 
             <!-- End Date-Time Picker -->
             <div>
-                <label for="end_datetime">End Date and Time:</label>
-                <input type="datetime-local" id="end_datetime" name="end_datetime" required>
+                <label for="end">End Date and Time:</label>
+                <input type="datetime-local" id="end" name="end" required>
             </div>
 
             <div>
@@ -62,12 +63,30 @@
         </form>
     </div>
 </div>
+
 <script>
+    // Function to get the user's timezone
+    function getUserTimezone() {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+
+    // Store timezone in hidden input
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('user-timezone').value = getUserTimezone();
+
+        document.querySelectorAll('.circular-button').forEach(function(button) {
+            var startTimestamp = button.getAttribute('start');
+            var endTimestamp = button.getAttribute('end');
+
+            button.setAttribute('start', formatTimestamp(startTimestamp, getUserTimezone()));
+            button.setAttribute('end', formatTimestamp(endTimestamp, getUserTimezone()));
+        });
+    });
+
     function formatTimestamp(timestamp, timezone) {
         if (!timestamp) return '';
-        
+
         var date = new Date(parseInt(timestamp) * 1000); // Convert from seconds to milliseconds
-        
         var options = { 
             weekday: 'long', 
             year: 'numeric', 
@@ -76,59 +95,39 @@
             hour: '2-digit', 
             minute: '2-digit',
             hour12: false, // Use 24-hour format
-            timeZone: timezone // Use the timezone passed from Flask
+            timeZone: timezone // Use the timezone passed from Flask or JavaScript
         };
-        
-        return new Intl.DateTimeFormat('en-GB', options).format(date); // Use the specified timezone and 24-hour format
+        return new Intl.DateTimeFormat('en-GB', options).format(date);
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        document.querySelectorAll('.circular-button').forEach(function(button) {
-            var startTimestamp = button.getAttribute('start');
-            var endTimestamp = button.getAttribute('end');
-
-            button.setAttribute('start', formatTimestamp(startTimestamp));
-            button.setAttribute('end', formatTimestamp(endTimestamp));
-        });
-    });
-
     function openModal(deskId) {
-        // Set the desk ID
         document.getElementById('modal-desk-id').textContent = deskId;
         document.getElementById('modal-desk-id-input').value = deskId;
 
-        // Get the button element to update tooltips
         var button = document.querySelector(`button[onclick="openModal(${deskId})"]`);
         if (button) {
             var startTimestamp = button.getAttribute('start');
             var endTimestamp = button.getAttribute('end');
 
-            // Format timestamps and set data attributes
-            button.setAttribute('data-start', formatTimestamp(startTimestamp));
-            button.setAttribute('data-end', formatTimestamp(endTimestamp));
+            button.setAttribute('data-start', formatTimestamp(startTimestamp, getUserTimezone()));
+            button.setAttribute('data-end', formatTimestamp(endTimestamp, getUserTimezone()));
         }
 
         var localDate = new Date();
-
-        // Extract local time components
         var year = localDate.getFullYear();
-        var month = String(localDate.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+        var month = String(localDate.getMonth() + 1).padStart(2, '0');
         var day = String(localDate.getDate()).padStart(2, '0');
         var hours = String(localDate.getHours()).padStart(2, '0');
         var minutes = String(localDate.getMinutes()).padStart(2, '0');
-        var seconds = String(localDate.getSeconds()).padStart(2, '0');
 
-        // Format as YYYY-MM-DDTHH:MM
         var startDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-
         var endTime = new Date();
         endTime.setUTCHours(23, 59, 0, 0);
-        var endDateTime = endTime.toISOString().substring(0, 16); // YYYY-MM-DDTHH:MM
+        var endDateTime = endTime.toISOString().substring(0, 16);
 
-        document.getElementById('start_datetime').value = startDateTime;
-        document.getElementById('end_datetime').value = endDateTime;
+        document.getElementById('start').value = startDateTime;
+        document.getElementById('end').value = endDateTime;
 
-        // Show the modal
         document.getElementById('bookingModal').style.display = 'block';
     }
 
@@ -146,6 +145,5 @@
         window.history.back();
     }
 </script>
-
 
 {% endblock %}
