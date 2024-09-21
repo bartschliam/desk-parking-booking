@@ -47,7 +47,7 @@ def clear_past_bookings():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(clear_past_bookings, 'cron', minute='*/240')
+scheduler.add_job(clear_past_bookings, 'cron', hour='*/4')
 scheduler.start()
 # if __name__ == '__main__':
 #     app = create_app()
