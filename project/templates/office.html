@@ -3,17 +3,36 @@
 {% block content %}
 {% with messages = get_flashed_messages(with_categories=true) %} 
     {% for category, message in messages %}
-    {% if category == 'success' %}
-        <div class="notification is-success">{{ message }}</div>
-    {% else %}
-        <div class="notification is-danger">{{ message }}</div>
-    {% endif %}
+        {% if category == 'success' %}
+            <div class="notification is-success">{{ message }}</div>
+        {% else %}
+            <div class="notification is-danger">{{ message }}</div>
+        {% endif %}
     {% endfor %}
 {% endwith %}
-    
+
 <div class="button-container">
+    <button class="toggle-button" onclick="showSection('rooms')">Rooms</button>
+    <button class="toggle-button" onclick="showSection('parking')">Parking</button>
+</div>
+
+<div id="rooms" class="button-grid" style="display: flex;">
     {% for room in rooms %}
-        <a href="/room?room_id={{room.id}}" class="button is-primary is-large button-left">{{ room.name }}</a>
+        <a href="/room?room_id={{ room.id }}" class="button is-primary is-large">{{ room.name }}</a>
     {% endfor %}
 </div>
+
+<div id="parking" class="button-grid" style="display: none;">
+    {% for spot in parking_spots %}  {# Assuming you have a parking_spots variable similar to rooms #}
+        <a href="/parking?spot_id={{ spot.id }}" class="button is-primary is-large">{{ spot.name }}</a>
+    {% endfor %}
+</div>
+
+<script>
+function showSection(section) {
+    document.getElementById('rooms').style.display = section === 'rooms' ? 'flex' : 'none';
+    document.getElementById('parking').style.display = section === 'parking' ? 'block' : 'none';
+}
+</script>
+
 {% endblock %}

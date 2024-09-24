@@ -4,3 +4,4 @@ project/__pycache__
 env
 .env
 instance
+json

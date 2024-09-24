@@ -264,3 +264,30 @@ form {
 label {
     font-weight: bold; /* Added font-weight */
 }
+
+.button-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Adjusts spacing between buttons */
+  gap: 10px; /* Optional: Adds space between buttons */
+}
+
+.button-grid .button {
+  flex: 0 0 calc(50% - 10px); /* Makes each button take 50% width minus gap */
+  box-sizing: border-box; /* Ensures padding is included in width calculations */
+}
+
+.toggle-button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #007bff; /* Button background color */
+    color: white; /* Text color */
+    border: none; /* No border */
+    border-radius: 5px; /* Rounded corners */
+}
+
+.toggle-button:hover {
+    background-color: #0056b3; /* Darker on hover */
+}

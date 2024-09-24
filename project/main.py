@@ -89,7 +89,8 @@ def office():
     office_name = request.args.get('name')
     office_id = Office.query.filter_by(name=office_name).first().id
     rooms = Room.query.filter_by(office_id=office_id).order_by(Room.id.asc()).all()
-    return render_template('office.html', rooms=rooms)
+    parking_spots = Parking.query.filter_by(office_id=office_id).order_by(Parking.name.asc()).all()
+    return render_template('office.html', rooms=rooms, parking_spots=parking_spots)
 
 
 @app.route('/room', methods=['GET', 'POST'])
