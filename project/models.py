@@ -44,8 +44,11 @@ class Desk(db.Model):
     y = db.Column(db.Integer)
 
     room_id = db.Column(db.Integer, db.ForeignKey('room.id'))
+    room = db.relationship('Room', backref='desks')
     office_id = db.Column(db.Integer, db.ForeignKey('office.id'))
+    office = db.relationship('Office', backref='desks')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref='desks')
 
 
 class Parking(db.Model):

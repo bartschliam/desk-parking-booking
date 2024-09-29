@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from .models import User, Feedback, Office, Room, Desk, Parking
 from sqlalchemy import desc, func
 from apscheduler.schedulers.background import BackgroundScheduler
+import pytz
 
 load_dotenv()
 env_suffix = os.getenv('ENVIRONMENT')
@@ -98,8 +99,12 @@ def office():
 def room():
     if request.method == 'POST':
         desk_id = request.form.get('desk_id')
-        start = int(datetime.strptime(request.form.get('start'), '%Y-%m-%dT%H:%M').timestamp())
-        end = int(datetime.strptime(request.form.get('end'), '%Y-%m-%dT%H:%M').timestamp())
+        start_time = request.form.get('start')
+        print(start_time)
+        end_time = request.form.get('end')
+        print(end_time)
+        start = int(datetime.strptime(start_time, '%Y-%m-%dT%H:%M').timestamp())
+        end = int(datetime.strptime(end_time, '%Y-%m-%dT%H:%M').timestamp())
         permanent = 'permanent' in request.form
         desk = Desk.query.filter_by(id=desk_id).first()
         desk.reserved = True
@@ -127,9 +132,23 @@ def desks():
 
 @app.route('/bookings', methods=['GET', 'POST'])
 def bookings():
+    if request.method == 'POST':
+        desk_id = request.form.get('desk_id')
+        parking_id = request.form.get('parking_id')
+        if desk_id:
+            desk = Desk.query.filter_by(id=desk_id).first()
+            desk.reserved = False
+            desk.reserved_by = None
+            desk.start = None
+            desk.end = None
+            desk.user_id = None
+            db.session.commit()
+        if parking_id:
+            print(f"Parking ID: {parking_id}")
     desks = Desk.query.filter_by(user_id=current_user.id).all()
     parkings = Parking.query.filter_by(user_id=current_user.id).all()
-    return render_template('bookings.html', desks=desks, parkings=parkings)
+    rooms = Room.query.all()
+    return render_template('bookings.html', desks=desks, parkings=parkings, rooms=rooms)
 
 
 @app.route('/book_parking', methods=['GET', 'POST'])
