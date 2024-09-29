@@ -38,17 +38,16 @@ class Desk(db.Model):
     name = db.Column(db.String(255))
     reserved = db.Column(db.Boolean)
     reserved_by = db.Column(db.String(1000))
-    start = db.Column(db.Integer)
-    end = db.Column(db.Integer)
     x = db.Column(db.Integer)
     y = db.Column(db.Integer)
 
     room_id = db.Column(db.Integer, db.ForeignKey('room.id'))
-    room = db.relationship('Room', backref='desks')
+    room = db.relationship('Room', backref='desk')
     office_id = db.Column(db.Integer, db.ForeignKey('office.id'))
-    office = db.relationship('Office', backref='desks')
+    office = db.relationship('Office', backref='desk')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    user = db.relationship('User', backref='desks')
+    user = db.relationship('User', backref='desk')
+    bookings = db.relationship('Booking', backref='desk', foreign_keys='Booking.desk_id')
 
 
 class Parking(db.Model):
@@ -57,11 +56,23 @@ class Parking(db.Model):
     name = db.Column(db.String(255))
     reserved = db.Column(db.Boolean)
     reserved_by = db.Column(db.String(1000))
-    start = db.Column(db.Integer)
-    end = db.Column(db.Integer)
 
     office_id = db.Column(db.Integer, db.ForeignKey('office.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+
+class Booking(db.Model):
+    __tablename__ = 'booking'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref='booking')
+    start = db.Column(db.Integer)
+    end = db.Column(db.Integer)
+    type = db.Column(db.String(255))
+    desk_id = db.Column(db.Integer, db.ForeignKey('desk.id'))
+    parking_id = db.Column(db.Integer, db.ForeignKey('parking.id'))
+    parking = db.relationship('Parking', backref='booking')
+    reserved_by = db.Column(db.String(1000))
 
 
 '''

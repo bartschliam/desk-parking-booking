@@ -21,31 +21,33 @@
                 <th>Desk</th>
                 <th>Room</th>
                 <th>Office</th>
-                <th>Start</th>
-                <th>End</th>
+                <th>Duration</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
-            {% for desk in desks %}
+            {% for booking in bookings %}
             <tr>
+                {% for desk in desks %}
+                {% if desk.id == booking.desk_id %}
                 <td>{{ desk.name }}</td>
                 <td>{{ desk.room.name }}</td>
                 <td>{{ desk.office.name }}</td>
                 <td>
-                    <span id="desk-{{ desk.id }}" 
-                    data-start="{{ desk.start }}" 
-                    data-end="{{ desk.end }}">
+                    <span id="desk-{{ booking.id }}" 
+                    data-start="{{ booking.start }}" 
+                    data-end="{{ booking.end }}">
                     <span class="start-time"></span> - <span class="end-time"></span>
                     </span>
                 </td>
-                <td>{{ desk.end }}</td>
                 <td>
-                    <form action="{{ url_for('bookings', booking_id=desk.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this desk booking?');">
-                        <input type="hidden" name="desk_id" value="{{ desk.id }}">
+                    <form action="{{ url_for('bookings', booking_id=booking.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this desk booking?');">
+                        <input type="hidden" name="booking_id" value="{{ booking.id }}">
                         <button type="submit" class="button is-danger">Cancel</button>
                     </form>
                 </td>
+                {% endif %}
+                {% endfor %}
             </tr>
             {% endfor %}
         </tbody>

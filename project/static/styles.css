@@ -200,7 +200,7 @@ footer {
 }
 
 .circular-button:hover::after {
-  content: attr(reserved_by) "\A" attr(start) "\A" attr(end); /* Use line breaks */
+  content: attr(test);
   position: absolute;
   bottom: 120%; /* Position above the button */
   left: 50%;

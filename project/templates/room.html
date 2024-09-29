@@ -22,9 +22,9 @@
                         <button 
                             class="circular-button" 
                             onclick="openModal({{ desk.id }})"
-                            reserved_by="{{ desk.reserved_by if desk.reserved else 'Available' }}"
-                            start="{{ desk.start if desk.start else ''}}"
-                            end="{{ desk.end if desk.end else ''}}"
+                            reserved_by="{{ (bookings | selectattr('desk_id', 'equalto', desk.id) | map(attribute='reserved_by') | list | join(',')) if bookings | selectattr('desk_id', 'equalto', desk.id) else 'Available' }}"
+                            start="{{ bookings | selectattr('desk_id', 'equalto', desk.id) | map(attribute='start') | list | join(',') }}"
+                            end="{{ bookings | selectattr('desk_id', 'equalto', desk.id) | map(attribute='end') | list | join(',') }}"
                             >Desk {{ desk.name }}
                         </button>
                     </div>
@@ -83,10 +83,28 @@
         });
     });
 
-    function formatTimestamp(timestamp, timezone) {
-        if (!timestamp) return '';
+    document.querySelectorAll('.circular-button').forEach(button => {
+        button.addEventListener('mouseenter', function() {
+            const reservedBy = this.getAttribute('reserved_by').split(',');
+            const starts = this.getAttribute('start').split(',');
+            const ends = this.getAttribute('end').split(',');
+    
+            // Create tooltip content
+            const tooltipContent = reservedBy.map((name, index) => 
+                `${name}\n${starts[index]} - ${ends[index]}\n`
+            ).join('\n'); // Join with new lines
+    
+            this.setAttribute('test', tooltipContent); // Set the CSS variable
+        });
+    });
 
-        var date = new Date(parseInt(timestamp) * 1000); // Convert from seconds to milliseconds
+    function formatTimestamp(timestamps, timezone) {
+        if (!timestamps) return '';
+    
+        // Split the input into an array if it's a string
+        var timestampArray = typeof timestamps === 'string' ? timestamps.split(',').map(Number) : [parseInt(timestamps)];
+    
+        // Format each timestamp
         var options = { 
             weekday: 'long', 
             year: 'numeric', 
@@ -97,22 +115,41 @@
             hour12: false, // Use 24-hour format
             timeZone: timezone // Use the timezone passed from Flask or JavaScript
         };
-        return new Intl.DateTimeFormat('en-GB', options).format(date);
+    
+        // Map each timestamp to its formatted date
+        var formattedDates = timestampArray.map(ts => {
+            var date = new Date(ts * 1000); // Convert from seconds to milliseconds
+            return new Intl.DateTimeFormat('en-GB', options).format(date);
+        });
+    
+        // Return the formatted dates as a comma-separated string
+        return formattedDates.join(',');
     }
 
     function openModal(deskId) {
         document.getElementById('modal-desk-id').textContent = deskId;
         document.getElementById('modal-desk-id-input').value = deskId;
-
         var button = document.querySelector(`button[onclick="openModal(${deskId})"]`);
         if (button) {
             var startTimestamp = button.getAttribute('start');
             var endTimestamp = button.getAttribute('end');
-
-            button.setAttribute('data-start', formatTimestamp(startTimestamp, getUserTimezone()));
-            button.setAttribute('data-end', formatTimestamp(endTimestamp, getUserTimezone()));
+            if (startTimestamp === '') {
+                // Format the timestamp and set the attribute
+                button.setAttribute('data-start', formatTimestamp(startTimestamp, getUserTimezone()));
+            } else {
+                // Keep the current value if it's empty
+                button.setAttribute('data-start', startTimestamp);
+            }
+        
+            // Check if endTimestamp is not an empty string
+            if (endTimestamp === '') {
+                // Format the timestamp and set the attribute
+                button.setAttribute('data-end', formatTimestamp(endTimestamp, getUserTimezone()));
+            } else {
+                // Keep the current value if it's empty
+                button.setAttribute('data-end', endTimestamp);
+            }
         }
-
         var localDate = new Date();
         var year = localDate.getFullYear();
         var month = String(localDate.getMonth() + 1).padStart(2, '0');

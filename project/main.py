@@ -6,7 +6,7 @@ from datetime import datetime, time as dt_time
 from .__init__ import db
 from .__init__ import create_app
 from dotenv import load_dotenv
-from .models import User, Feedback, Office, Room, Desk, Parking
+from .models import User, Feedback, Office, Room, Desk, Parking, Booking
 from sqlalchemy import desc, func
 from apscheduler.schedulers.background import BackgroundScheduler
 import pytz
@@ -30,20 +30,11 @@ application = app
 def clear_past_bookings():
     with app.app_context():
         now = datetime.now()
-        current_time = now.time()
-        # Define the time range (07:00 to 18:00)
-        start_time = dt_time(7, 0)
-        end_time = dt_time(18, 0)
-        if start_time <= current_time <= end_time:
-            now_timestamp = int(now.timestamp())
-            desks = Desk.query.filter(Desk.end < now_timestamp).all()
-            for desk in desks:
-                desk.reserved = False
-                desk.reserved_by = None
-                desk.start = None
-                desk.end = None
-                desk.user_id = None
-            db.session.commit()
+        now_timestamp = int(now.timestamp())
+        bookings = Booking.query.filter(Booking.end < now_timestamp).all()
+        for booking in bookings:
+            db.session.delete(booking)
+        db.session.commit()
     return
 
 
@@ -87,6 +78,8 @@ def profile():
 @app.route('/office', methods=['GET', 'POST'])
 @login_required
 def office():
+    if request.method == 'POST':
+        pass
     office_name = request.args.get('name')
     office_id = Office.query.filter_by(name=office_name).first().id
     rooms = Room.query.filter_by(office_id=office_id).order_by(Room.id.asc()).all()
@@ -100,27 +93,45 @@ def room():
     if request.method == 'POST':
         desk_id = request.form.get('desk_id')
         start_time = request.form.get('start')
-        print(start_time)
         end_time = request.form.get('end')
-        print(end_time)
-        start = int(datetime.strptime(start_time, '%Y-%m-%dT%H:%M').timestamp())
-        end = int(datetime.strptime(end_time, '%Y-%m-%dT%H:%M').timestamp())
+        start_requested = int(datetime.strptime(start_time, '%Y-%m-%dT%H:%M').timestamp())
+        end_requested = int(datetime.strptime(end_time, '%Y-%m-%dT%H:%M').timestamp())
         permanent = 'permanent' in request.form
         desk = Desk.query.filter_by(id=desk_id).first()
-        desk.reserved = True
-        desk.reserved_by = current_user.name
-        desk.start = start
-        desk.end = end
-        desk.user_id = current_user.id
-        db.session.commit()
-        session['flash_messages'].append(('Booking Successful', 'success'))
-        flash_messages()
+        bookings = Booking.query.filter_by(desk_id=desk_id).all()
+        if end_requested > start_requested:
+            desk.reserved = True
+            desk.reserved_by = current_user.name
+            valid = True
+            for booking in bookings:
+                if not (end_requested <= booking.start or start_requested >= booking.end):
+                    valid = False
+                    break
+            if valid:
+                max_booking_id = Booking.query.order_by(desc(Booking.id)).first()
+                booking = Booking(
+                    id=max_booking_id.id + 1 if max_booking_id else 1,
+                    user_id=current_user.id,
+                    start=start_requested,
+                    type='desk',
+                    end=end_requested,
+                    desk_id=desk_id,
+                    reserved_by=current_user.name
+                )
+                db.session.add(booking)
+                db.session.commit()
+                session['flash_messages'].append(('Booking Successful', 'success'))
+                flash_messages()
+            else:
+                session['flash_messages'].append(('Booking overlaps with other.', 'error'))
+                flash_messages()
     room_id = request.args.get('room_id')
 
     room = Room.query.filter_by(id=room_id).first()
     desks = Desk.query.filter_by(room_id=room_id).all()
     timezone = request.cookies.get('timezone', 'Europe/Zurich')
-    return render_template('room.html', desks=desks, room=room, timezone=timezone)
+    bookings = Booking.query.all()
+    return render_template('room.html', desks=desks, room=room, timezone=timezone, bookings=bookings)
 
 
 @app.route('/desks', methods=['GET', 'POST'])
@@ -133,22 +144,16 @@ def desks():
 @app.route('/bookings', methods=['GET', 'POST'])
 def bookings():
     if request.method == 'POST':
-        desk_id = request.form.get('desk_id')
-        parking_id = request.form.get('parking_id')
-        if desk_id:
-            desk = Desk.query.filter_by(id=desk_id).first()
-            desk.reserved = False
-            desk.reserved_by = None
-            desk.start = None
-            desk.end = None
-            desk.user_id = None
+        booking_id = request.form.get('booking_id')
+        if booking_id:
+            booking = Booking.query.filter_by(id=booking_id).first()
+            db.session.delete(booking)
             db.session.commit()
-        if parking_id:
-            print(f"Parking ID: {parking_id}")
     desks = Desk.query.filter_by(user_id=current_user.id).all()
     parkings = Parking.query.filter_by(user_id=current_user.id).all()
     rooms = Room.query.all()
-    return render_template('bookings.html', desks=desks, parkings=parkings, rooms=rooms)
+    bookings = Booking.query.filter_by(user_id=current_user.id).all()
+    return render_template('bookings.html', desks=desks, parkings=parkings, rooms=rooms, bookings=bookings)
 
 
 @app.route('/book_parking', methods=['GET', 'POST'])
