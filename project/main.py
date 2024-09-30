@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from .models import User, Feedback, Office, Room, Desk, Parking, Booking
 from sqlalchemy import desc, func
 from apscheduler.schedulers.background import BackgroundScheduler
-import pytz
+from pytz import timezone
 
 load_dotenv()
 env_suffix = os.getenv('ENVIRONMENT')
@@ -25,6 +25,8 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 mail = Mail(app)
 application = app
+zurich_tz = timezone('Europe/Zurich')
+utc_tz = timezone('UTC')
 
 
 def clear_past_bookings():
@@ -127,8 +129,12 @@ def room():
         start_time = request.form.get('start')
         end_time = request.form.get('end')
 
-        start_requested = int(datetime.strptime(start_time, '%Y-%m-%dT%H:%M').timestamp())
-        print(datetime.strptime(start_time, '%Y-%m-%dT%H:%M'), start_requested)
+        start_time_zurich = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
+        # Localize the start_time to Zurich timezone and convert to UTC
+        start_time_utc = zurich_tz.localize(start_time_zurich).astimezone(utc_tz)
+        # Get the timestamp in UTC
+        start_requested = int(start_time_utc.timestamp())
+        print(start_time_zurich, start_time_utc, start_requested)
         end_requested = int(datetime.strptime(end_time, '%Y-%m-%dT%H:%M').timestamp())
         permanent = 'permanent' in request.form
         desk = Desk.query.filter_by(id=desk_id).first()
