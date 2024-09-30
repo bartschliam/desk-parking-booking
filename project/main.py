@@ -25,7 +25,6 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 mail = Mail(app)
 application = app
-# zuerich_tz = pytz.timezone('Europe/Zurich')
 
 
 def clear_past_bookings():
