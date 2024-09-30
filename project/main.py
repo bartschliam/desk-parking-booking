@@ -25,6 +25,7 @@ app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 mail = Mail(app)
 application = app
+zuerich_tz = pytz.timezone('Europe/Zurich')
 
 
 def clear_past_bookings():
@@ -82,8 +83,17 @@ def office():
         spot_id = request.form.get('spot_id')
         start_time = request.form.get('start')
         end_time = request.form.get('end')
-        start_requested = int(datetime.strptime(start_time, '%Y-%m-%dT%H:%M').timestamp())
-        end_requested = int(datetime.strptime(end_time, '%Y-%m-%dT%H:%M').timestamp())
+        # Convert the incoming time strings to UTC timestamps
+        start_requested_utc = datetime.strptime(start_time, '%Y-%m-%dT%H:%M').replace(tzinfo=pytz.utc)
+        end_requested_utc = datetime.strptime(end_time, '%Y-%m-%dT%H:%M').replace(tzinfo=pytz.utc)
+
+        # Convert the UTC times to Zurich time
+        start_requested_zurich = start_requested_utc.astimezone(zuerich_tz)
+        end_requested_zurich = end_requested_utc.astimezone(zuerich_tz)
+
+        # Convert the Zurich times back to timestamps for storage
+        start_requested = int(start_requested_zurich.timestamp())
+        end_requested = int(end_requested_zurich.timestamp())
         parking = Parking.query.filter_by(id=spot_id).first()
         bookings = Booking.query.filter_by(parking_id=spot_id).all()
         if end_requested > start_requested:
@@ -126,8 +136,19 @@ def room():
         desk_id = request.form.get('desk_id')
         start_time = request.form.get('start')
         end_time = request.form.get('end')
-        start_requested = int(datetime.strptime(start_time, '%Y-%m-%dT%H:%M').timestamp())
-        end_requested = int(datetime.strptime(end_time, '%Y-%m-%dT%H:%M').timestamp())
+        # Convert the incoming time strings to UTC timestamps
+        start_requested_utc = datetime.strptime(start_time, '%Y-%m-%dT%H:%M').replace(tzinfo=pytz.utc)
+        end_requested_utc = datetime.strptime(end_time, '%Y-%m-%dT%H:%M').replace(tzinfo=pytz.utc)
+
+        # Convert the UTC times to Zurich time
+        start_requested_zurich = start_requested_utc.astimezone(zuerich_tz)
+        end_requested_zurich = end_requested_utc.astimezone(zuerich_tz)
+
+        # Convert the Zurich times back to timestamps for storage
+        start_requested = int(start_requested_zurich.timestamp())
+        end_requested = int(end_requested_zurich.timestamp())
+        # start_requested = int(datetime.strptime(start_time, '%Y-%m-%dT%H:%M').timestamp())
+        # end_requested = int(datetime.strptime(end_time, '%Y-%m-%dT%H:%M').timestamp())
         permanent = 'permanent' in request.form
         desk = Desk.query.filter_by(id=desk_id).first()
         bookings = Booking.query.filter_by(desk_id=desk_id).all()
