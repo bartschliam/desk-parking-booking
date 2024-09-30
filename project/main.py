@@ -40,8 +40,8 @@ def clear_past_bookings():
     return
 
 
-# scheduler = BackgroundScheduler()
-# scheduler.add_job(clear_past_bookings, 'cron', day='*/1')
+scheduler = BackgroundScheduler()
+scheduler.add_job(clear_past_bookings, 'cron', day='*/1')
 # scheduler.start()
 # if __name__ == '__main__':
 #     app = create_app()
