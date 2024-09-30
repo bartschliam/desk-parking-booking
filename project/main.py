@@ -79,12 +79,44 @@ def profile():
 @login_required
 def office():
     if request.method == 'POST':
-        pass
+        spot_id = request.form.get('spot_id')
+        start_time = request.form.get('start')
+        end_time = request.form.get('end')
+        start_requested = int(datetime.strptime(start_time, '%Y-%m-%dT%H:%M').timestamp())
+        end_requested = int(datetime.strptime(end_time, '%Y-%m-%dT%H:%M').timestamp())
+        parking = Parking.query.filter_by(id=spot_id).first()
+        bookings = Booking.query.filter_by(parking_id=spot_id).all()
+        if end_requested > start_requested:
+            valid = True
+            for booking in bookings:
+                if not (end_requested <= booking.start or start_requested >= booking.end):
+                    valid = False
+                    break
+            if valid:
+                parking.reserved = True
+                max_booking_id = Booking.query.order_by(desc(Booking.id)).first()
+                booking = Booking(
+                    id=max_booking_id.id + 1 if max_booking_id else 1,
+                    user_id=current_user.id,
+                    start=start_requested,
+                    type='parking',
+                    end=end_requested,
+                    parking_id=spot_id,
+                    reserved_by=current_user.name
+                )
+                db.session.add(booking)
+                session['flash_messages'].append(('Booking Successful', 'success'))
+                flash_messages()
+            else:
+                session['flash_messages'].append(('Booking overlaps with other.', 'error'))
+                flash_messages()
+            db.session.commit()
     office_name = request.args.get('name')
     office_id = Office.query.filter_by(name=office_name).first().id
     rooms = Room.query.filter_by(office_id=office_id).order_by(Room.id.asc()).all()
     parking_spots = Parking.query.filter_by(office_id=office_id).order_by(Parking.name.asc()).all()
-    return render_template('office.html', rooms=rooms, parking_spots=parking_spots)
+    bookings = Booking.query.all()
+    return render_template('office.html', rooms=rooms, parking_spots=parking_spots, bookings=bookings)
 
 
 @app.route('/room', methods=['GET', 'POST'])
@@ -100,14 +132,13 @@ def room():
         desk = Desk.query.filter_by(id=desk_id).first()
         bookings = Booking.query.filter_by(desk_id=desk_id).all()
         if end_requested > start_requested:
-            desk.reserved = True
-            desk.reserved_by = current_user.name
             valid = True
             for booking in bookings:
                 if not (end_requested <= booking.start or start_requested >= booking.end):
                     valid = False
                     break
             if valid:
+                desk.reserved = True
                 max_booking_id = Booking.query.order_by(desc(Booking.id)).first()
                 booking = Booking(
                     id=max_booking_id.id + 1 if max_booking_id else 1,
@@ -119,12 +150,12 @@ def room():
                     reserved_by=current_user.name
                 )
                 db.session.add(booking)
-                db.session.commit()
                 session['flash_messages'].append(('Booking Successful', 'success'))
                 flash_messages()
             else:
                 session['flash_messages'].append(('Booking overlaps with other.', 'error'))
                 flash_messages()
+            db.session.commit()
     room_id = request.args.get('room_id')
 
     room = Room.query.filter_by(id=room_id).first()
@@ -147,12 +178,38 @@ def bookings():
         booking_id = request.form.get('booking_id')
         if booking_id:
             booking = Booking.query.filter_by(id=booking_id).first()
+            desk_id = booking.desk_id
+            parking_id = booking.parking_id
             db.session.delete(booking)
             db.session.commit()
-    desks = Desk.query.filter_by(user_id=current_user.id).all()
-    parkings = Parking.query.filter_by(user_id=current_user.id).all()
+            found_desk = False
+            found_parking = False
+            bookings = Booking.query.all()
+            for booking in bookings:
+                if booking.desk_id == desk_id:
+                    found_desk = True
+                    break
+                if booking.parking_id == parking_id:
+                    found_parking = True
+                    break
+            if not found_desk and desk_id:
+                desk = Desk.query.filter_by(id=desk_id).first()
+                desk.reserved = False
+                # desk.reserved_by = None
+                # desk.user_id = None
+            if not found_parking and parking_id:
+                parking = Parking.query.filter_by(id=parking_id).first()
+                parking.reserved = False
+                # parking.reserved_by = None
+                # parking.user_id = None
+            db.session.commit()
     rooms = Room.query.all()
     bookings = Booking.query.filter_by(user_id=current_user.id).all()
+    booking_desk_ids = [booking.desk_id for booking in bookings if booking.desk_id is not None]
+    booking_parking_ids = [booking.parking_id for booking in bookings if booking.parking_id is not None]
+    desks = Desk.query.filter(Desk.id.in_(booking_desk_ids)).all()
+    parkings = Parking.query.filter(Parking.id.in_(booking_parking_ids)).all()
+
     return render_template('bookings.html', desks=desks, parkings=parkings, rooms=rooms, bookings=bookings)
 
 

@@ -58,6 +58,7 @@ class Parking(db.Model):
     reserved_by = db.Column(db.String(1000))
 
     office_id = db.Column(db.Integer, db.ForeignKey('office.id'))
+    office = db.relationship('Office', backref='parking')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 

@@ -63,24 +63,32 @@
             <tr>
                 <th>Parking Spot</th>
                 <th>Location</th>
-                <th>Start</th>
-                <th>End</th>
+                <th>Duration</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
-            {% for parking in parkings %}
+            {% for booking in bookings %}
             <tr>
+                {% for parking in parkings %}
+                {% if parking.id == booking.parking_id %}
                 <td>{{ parking.name }}</td>
                 <td>{{ parking.office.name }}</td>
-                <td>{{ parking.start.strftime('%A, %d %B %Y, %H:%M') }}</td>
-                <td>{{ parking.end.strftime('%A, %d %B %Y, %H:%M') }}</td>
                 <td>
-                    <form action="{{ url_for('cancel_parking_booking', booking_id=parking.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this parking booking?');">
-                        <input type="hidden" name="parking_id" value="{{ parking.id }}">
+                    <span id="parking-{{ booking.id }}" 
+                    data-start="{{ booking.start }}" 
+                    data-end="{{ booking.end }}">
+                    <span class="start-time"></span> - <span class="end-time"></span>
+                    </span>
+                </td>
+                <td>
+                    <form action="{{ url_for('bookings', booking_id=booking.id) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel this parking booking?');">
+                        <input type="hidden" name="booking_id" value="{{ booking.id }}">
                         <button type="submit" class="button is-danger">Cancel</button>
                     </form>
                 </td>
+                {% endif %}
+                {% endfor %}
             </tr>
             {% endfor %}
         </tbody>
