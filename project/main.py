@@ -84,8 +84,12 @@ def office():
         spot_id = request.form.get('spot_id')
         start_time = request.form.get('start')
         end_time = request.form.get('end')
-        start_requested = int(datetime.strptime(start_time, '%Y-%m-%dT%H:%M').timestamp())
-        end_requested = int(datetime.strptime(end_time, '%Y-%m-%dT%H:%M').timestamp())
+        start_time_zurich = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
+        end_time_zurich = datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
+        start_time_utc = zurich_tz.localize(start_time_zurich).astimezone(utc_tz)
+        end_time_utc = zurich_tz.localize(end_time_zurich).astimezone(utc_tz)
+        start_requested = int(start_time_utc.timestamp())
+        end_requested = int(end_time_utc.timestamp())
         parking = Parking.query.filter_by(id=spot_id).first()
         bookings = Booking.query.filter_by(parking_id=spot_id).all()
         if end_requested > start_requested:
@@ -130,12 +134,11 @@ def room():
         end_time = request.form.get('end')
 
         start_time_zurich = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
-        # Localize the start_time to Zurich timezone and convert to UTC
+        end_time_zurich = datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
         start_time_utc = zurich_tz.localize(start_time_zurich).astimezone(utc_tz)
-        # Get the timestamp in UTC
+        end_time_utc = zurich_tz.localize(end_time_zurich).astimezone(utc_tz)
         start_requested = int(start_time_utc.timestamp())
-        print(start_time_zurich, start_time_utc, start_requested)
-        end_requested = int(datetime.strptime(end_time, '%Y-%m-%dT%H:%M').timestamp())
+        end_requested = int(end_time_utc.timestamp())
         permanent = 'permanent' in request.form
         desk = Desk.query.filter_by(id=desk_id).first()
         bookings = Booking.query.filter_by(desk_id=desk_id).all()
