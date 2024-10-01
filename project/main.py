@@ -33,8 +33,26 @@ def clear_past_bookings():
     with app.app_context():
         now = datetime.now()
         now_timestamp = int(now.timestamp())
-        bookings = Booking.query.filter(Booking.end < now_timestamp).all()
-        for booking in bookings:
+        bookings_filtered = Booking.query.filter(Booking.end < now_timestamp).all()
+        for booking1 in bookings_filtered:
+            desk_id = booking1.desk_id
+            parking_id = booking1.parking_id
+            found_desk = False
+            found_parking = False
+            bookings = Booking.query.all()
+            for booking in bookings:
+                if booking.desk_id == desk_id:
+                    found_desk = True
+                    break
+                if booking.parking_id == parking_id:
+                    found_parking = True
+                    break
+            if not found_desk and desk_id:
+                desk = Desk.query.filter_by(id=desk_id).first()
+                desk.reserved = False
+            if not found_parking and parking_id:
+                parking = Parking.query.filter_by(id=parking_id).first()
+                parking.reserved = False
             db.session.delete(booking)
         db.session.commit()
     return
@@ -192,7 +210,6 @@ def bookings():
             desk_id = booking.desk_id
             parking_id = booking.parking_id
             db.session.delete(booking)
-            db.session.commit()
             found_desk = False
             found_parking = False
             bookings = Booking.query.all()
