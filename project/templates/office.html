@@ -90,7 +90,7 @@
 
             // Create tooltip content
             const tooltipContent = reservedBy.map((name, index) => 
-                `${name}\n${starts[index]}\n - ${ends[index]}\n`
+                `${name}\n${starts[index]} - \n${ends[index]}\n`
             ).join('\n'); // Join with new lines
 
             this.setAttribute('test', tooltipContent); // Set the CSS variable
