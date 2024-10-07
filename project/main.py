@@ -29,6 +29,26 @@ zurich_tz = timezone('Europe/Zurich')
 utc_tz = timezone('UTC')
 
 
+def update_desks_parkings(desk_id, parking_id):
+    found_desk = False
+    found_parking = False
+    bookings = Booking.query.all()
+    for booking in bookings:
+        if booking.desk_id is not None and booking.desk_id == desk_id:
+            found_desk = True
+            break
+        if booking.parking_id is not None and booking.parking_id == parking_id:
+            found_parking = True
+            break
+    if not found_desk and desk_id:
+        desk = Desk.query.filter_by(id=desk_id).first()
+        desk.reserved = False
+    if not found_parking and parking_id:
+        parking = Parking.query.filter_by(id=parking_id).first()
+        parking.reserved = False
+    return
+
+
 def clear_past_bookings():
     with app.app_context():
         now = datetime.now()
@@ -39,22 +59,7 @@ def clear_past_bookings():
             parking_id = expired_booking.parking_id
             db.session.delete(expired_booking)
             db.session.commit()
-            found_desk = False
-            found_parking = False
-            bookings = Booking.query.all()
-            for booking in bookings:
-                if booking.desk_id == desk_id:
-                    found_desk = True
-                    break
-                if booking.parking_id == parking_id:
-                    found_parking = True
-                    break
-            if not found_desk and desk_id:
-                desk = Desk.query.filter_by(id=desk_id).first()
-                desk.reserved = False
-            if not found_parking and parking_id:
-                parking = Parking.query.filter_by(id=parking_id).first()
-                parking.reserved = False
+            update_desks_parkings(desk_id, parking_id)
         db.session.commit()
     return
 
@@ -212,26 +217,7 @@ def bookings():
             parking_id = booking.parking_id
             db.session.delete(booking)
             db.session.commit()
-            found_desk = False
-            found_parking = False
-            bookings = Booking.query.all()
-            for booking in bookings:
-                if booking.desk_id == desk_id:
-                    found_desk = True
-                    break
-                if booking.parking_id == parking_id:
-                    found_parking = True
-                    break
-            if not found_desk and desk_id:
-                desk = Desk.query.filter_by(id=desk_id).first()
-                desk.reserved = False
-                # desk.reserved_by = None
-                # desk.user_id = None
-            if not found_parking and parking_id:
-                parking = Parking.query.filter_by(id=parking_id).first()
-                parking.reserved = False
-                # parking.reserved_by = None
-                # parking.user_id = None
+            update_desks_parkings(desk_id, parking_id)
             db.session.commit()
     rooms = Room.query.all()
     bookings = Booking.query.filter_by(user_id=current_user.id).all()
