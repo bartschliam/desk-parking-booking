@@ -58,8 +58,7 @@ def clear_past_bookings():
             desk_id = expired_booking.desk_id
             parking_id = expired_booking.parking_id
             db.session.delete(expired_booking)
-            db.session.commit()
-            update_desks_parkings(desk_id, parking_id)
+        update_desks_parkings(desk_id, parking_id)
         db.session.commit()
     return
 
