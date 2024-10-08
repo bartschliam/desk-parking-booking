@@ -10,6 +10,7 @@ from .models import User, Feedback, Office, Room, Desk, Parking, Booking
 from sqlalchemy import desc, func
 from apscheduler.schedulers.background import BackgroundScheduler
 from pytz import timezone
+import pytz
 
 load_dotenv()
 env_suffix = os.getenv('ENVIRONMENT')
@@ -53,6 +54,9 @@ def clear_past_bookings():
     with app.app_context():
         now = datetime.now()
         now_timestamp = int(now.timestamp())
+        zurich_tz = pytz.timezone('Europe/Zurich')
+        now_zurich = datetime.now(zurich_tz)
+        now_timestamp = int(now_zurich.timestamp())
         expired_bookings = Booking.query.filter(Booking.end < now_timestamp).all()
         for expired_booking in expired_bookings:
             desk_id = expired_booking.desk_id
