@@ -11,6 +11,10 @@
     {% endfor %}
 {% endwith %}
 
+<div class="header">
+    <h2 id="current-date"></h2>
+</div>
+
 <div class="button-container">
     <button class="toggle-button" onclick="showSection('rooms')">Rooms</button>
     <button class="toggle-button" onclick="showSection('parking')">Parking</button>
@@ -64,6 +68,19 @@
 </div>
 
 <script>
+    // Function to get and display the current date
+    function showCurrentDate() {
+        var today = new Date();
+        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        var formattedDate = today.toLocaleDateString('en-GB', options);
+
+        document.getElementById('current-date').textContent = formattedDate;
+    }
+
+    // Display the date when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        showCurrentDate();
+    });
     // Function to get the user's timezone
     function getUserTimezone() {
         return Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -122,7 +139,6 @@
         });
 
         // Return the formatted dates as a comma-separated string
-        console.log(formattedDates)
         return formattedDates.join(',');
     }
     

@@ -145,7 +145,7 @@ def office():
     office_id = Office.query.filter_by(name=office_name).first().id
     rooms = Room.query.filter_by(office_id=office_id).order_by(Room.id.asc()).all()
     parking_spots = Parking.query.filter_by(office_id=office_id).order_by(Parking.name.asc()).all()
-    bookings = Booking.query.all()
+    bookings = Booking.query.order_by(Booking.start.desc()).all()
     return render_template('office.html', rooms=rooms, parking_spots=parking_spots, bookings=bookings)
 
 
@@ -196,7 +196,7 @@ def room():
     room = Room.query.filter_by(id=room_id).first()
     desks = Desk.query.filter_by(room_id=room_id).all()
     timezone = request.cookies.get('timezone', 'Europe/Zurich')
-    bookings = Booking.query.all()
+    bookings = Booking.query.order_by(Booking.start.desc()).all()
     return render_template('room.html', desks=desks, room=room, timezone=timezone, bookings=bookings)
 
 
@@ -220,12 +220,11 @@ def bookings():
             update_desks_parkings(desk_id, parking_id)
             db.session.commit()
     rooms = Room.query.all()
-    bookings = Booking.query.filter_by(user_id=current_user.id).all()
+    bookings = Booking.query.filter_by(user_id=current_user.id).order_by(Booking.start.desc()).all()
     booking_desk_ids = [booking.desk_id for booking in bookings if booking.desk_id is not None]
     booking_parking_ids = [booking.parking_id for booking in bookings if booking.parking_id is not None]
     desks = Desk.query.filter(Desk.id.in_(booking_desk_ids)).all()
     parkings = Parking.query.filter(Parking.id.in_(booking_parking_ids)).all()
-
     return render_template('bookings.html', desks=desks, parkings=parkings, rooms=rooms, bookings=bookings)
 
 

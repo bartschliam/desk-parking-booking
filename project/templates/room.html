@@ -9,6 +9,9 @@
     {% endif %}
     {% endfor %}
 {% endwith %}
+<div class="header">
+    <h2 id="current-date"></h2>
+</div>
 <h1>{{ room.name }}</h1>
 <button onclick="goBack()" class="button is-secondary">Back</button>
 
@@ -65,6 +68,19 @@
 </div>
 
 <script>
+    // Function to get and display the current date
+    function showCurrentDate() {
+        var today = new Date();
+        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        var formattedDate = today.toLocaleDateString('en-GB', options);
+
+        document.getElementById('current-date').textContent = formattedDate;
+    }
+
+    // Display the date when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        showCurrentDate();
+    });
     // Function to get the user's timezone
     function getUserTimezone() {
         return 'Europe/Zurich';
