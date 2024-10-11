@@ -25,7 +25,7 @@
                         <button 
                             class="circular-button" 
                             onclick="openModal({{ desk.id }})"
-                            reserved_by="{{ (bookings | selectattr('desk_id', 'equalto', desk.id) | map(attribute='reserved_by') | list | join(',')) if bookings | selectattr('desk_id', 'equalto', desk.id) else 'Available' }}"
+                            reserved_by="{{ (bookings | selectattr('desk_id', 'equalto', desk.id) | map(attribute='reserved_by') | list | join(',')) or 'Available' }}"
                             start="{{ bookings | selectattr('desk_id', 'equalto', desk.id) | map(attribute='start') | list | join(',') }}"
                             end="{{ bookings | selectattr('desk_id', 'equalto', desk.id) | map(attribute='end') | list | join(',') }}"
                             >Desk {{ desk.name }}

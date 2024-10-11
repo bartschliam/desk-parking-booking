@@ -47,6 +47,7 @@ def update_desks_parkings(desk_id, parking_id):
     if not found_parking and parking_id:
         parking = Parking.query.filter_by(id=parking_id).first()
         parking.reserved = False
+    db.session.commit()
     return
 
 

@@ -148,6 +148,11 @@ footer {
   justify-content: center; /* Center the row items */
 }
 
+.item-parking {
+  width: fit-content;
+  display: inline-block;
+}
+
 .grid-item {
   width: 100px;
   height: 100px;
@@ -155,10 +160,6 @@ footer {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.desk {
-  background-color: lightgreen;
 }
 
 .empty {
@@ -187,6 +188,10 @@ footer {
 
 .desk {
   background-color: lightgreen; /* Default color for desks */
+}
+
+.parking {
+  background-color: lightgreen;
 }
 
 .circular-button {

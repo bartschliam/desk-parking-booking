@@ -28,15 +28,17 @@
 
 <div id="parking" class="button-grid" style="display: none;">
     {% for spot in parking_spots %}
+        <div class="item-parking {{ 'reserved' if spot.reserved else 'parking' }}">
         <button 
             class="circular-button" 
             onclick="openParkingModal({{ spot.id }})"
-            reserved_by="{{ (bookings | selectattr('parking_id', 'equalto', spot.id) | map(attribute='reserved_by') | list | join(',')) if bookings | selectattr('parking_id', 'equalto', spot.id) else 'Available' }}"
+            reserved_by="{{ (bookings | selectattr('parking_id', 'equalto', spot.id) | map(attribute='reserved_by') | list | join(',')) or 'Available' }}"
             start="{{ bookings | selectattr('parking_id', 'equalto', spot.id) | map(attribute='start') | list | join(',') }}"
             end="{{ bookings | selectattr('parking_id', 'equalto', spot.id) | map(attribute='end') | list | join(',') }}"
         >
             Parking Spot {{ spot.name }}
         </button>
+        </div>
     {% endfor %}
 </div>
 <!-- Modal HTML for Parking -->
