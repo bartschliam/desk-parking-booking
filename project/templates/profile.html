@@ -17,10 +17,19 @@
                 <legend>Profile Details</legend>
                 <div class="control">
                     <input class="input is-large" type="text" name="name" placeholder="Name" autofocus="" value="{% if user.name is not none %}{{ user.name }}{% endif %}"/>
-                    <input class="input is-large" type="email" name="email" placeholder="Email" autofocus="" value="{% if user.email is not none %}{{ user.email }}{% endif %}"/>
+                    <input class="input is-large" type="email" name="email" placeholder="Email" value="{% if user.email is not none %}{{ user.email }}{% endif %}"/>
                 </div>
             </fieldset>
             <button class="button is-block is-info is-large is-fullwidth" type="submit">Save</button>
+        </form>
+        <form method="POST" action="/reset_password">
+            <fieldset>
+                <legend>Reset Password</legend>
+                <div class="control">
+                    <input class="input is-large" type="password" name="new_password" placeholder="New Password" />
+                </div>
+            </fieldset>
+            <button class="button is-block is-info is-large is-fullwidth" type="submit">Reset Password</button>
         </form>
     </div>
     <a href="{{ url_for('auth.delete') }}" class="button is-danger">Delete Account</a>

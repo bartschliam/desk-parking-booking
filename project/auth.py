@@ -55,9 +55,6 @@ def signup():
         if not password:
             flash('Password is required')
             return redirect(url_for('auth.signup'))
-        if len(password) < 8:
-            flash('Password must be at least 8 characters long')
-            return redirect(url_for('auth.signup'))
         name = request.form.get('name')
         password = sha256_crypt.hash(password)
 
@@ -101,3 +98,35 @@ def delete_post():
     db.session.commit()
     flash('Your account has been deleted successfully.', 'success')
     return redirect(url_for('index'))
+
+
+@auth.route('/reset_password', methods=['POST'])
+@login_required
+def reset_password():
+    # Find the user by their email
+    user_email = current_user.email
+    new_password = request.form.get('new_password')
+    user = User.query.filter_by(email=user_email).first()
+    if not user:
+        session['flash_messages'].append(('No user', 'success'))
+        flash_messages()
+        return render_template('profile.html')
+
+    # Hash the new password
+    hashed_password = sha256_crypt.hash(new_password)
+
+    # Update the user's password
+    user.password = hashed_password
+
+    # Commit the changes to the database
+    db.session.commit()
+    session['flash_messages'].append(('Password reset successfuly', 'success'))
+    flash_messages()
+    return render_template('profile.html', user=current_user)
+
+
+def flash_messages():
+    messages = session.get('flash_messages', [])
+    for message in messages:
+        flash(message[0], message[1])
+    session['flash_messages'] = []
