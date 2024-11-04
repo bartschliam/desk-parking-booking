@@ -3,7 +3,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash,
 from passlib.hash import sha256_crypt
 from flask_login import login_user, login_required, logout_user, current_user
 from .models import User
-from .__init__ import db
+from .__init__ import db, flash_messages
 import stripe
 import os
 import json
@@ -41,6 +41,7 @@ def login_post():
                 json.dump({}, file)
         return redirect(url_for('index'))
     return render_template('login.html')
+
 
 @auth.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -100,15 +101,15 @@ def delete_post():
     return redirect(url_for('index'))
 
 
-@auth.route('/reset_password', methods=['POST'])
+@auth.route('/reset_password_logged_in', methods=['POST'])
 @login_required
-def reset_password():
+def reset_password_logged_in():
     # Find the user by their email
     user_email = current_user.email
     new_password = request.form.get('new_password')
     user = User.query.filter_by(email=user_email).first()
     if not user:
-        session['flash_messages'].append(('No user', 'success'))
+        session['flash_messages'].append(('No user', 'error'))
         flash_messages()
         return render_template('profile.html')
 
@@ -123,10 +124,3 @@ def reset_password():
     session['flash_messages'].append(('Password reset successfuly', 'success'))
     flash_messages()
     return render_template('profile.html', user=current_user)
-
-
-def flash_messages():
-    messages = session.get('flash_messages', [])
-    for message in messages:
-        flash(message[0], message[1])
-    session['flash_messages'] = []

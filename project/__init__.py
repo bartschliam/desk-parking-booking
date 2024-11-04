@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from dotenv import load_dotenv
@@ -47,3 +47,10 @@ def create_app():
     app.register_blueprint(main_blueprint)
 
     return app
+
+
+def flash_messages():
+    messages = session.get('flash_messages', [])
+    for message in messages:
+        flash(message[0], message[1])
+    session['flash_messages'] = []
