@@ -164,6 +164,57 @@ def office():
                 db.session.add(booking)
                 session['flash_messages'].append(('Booking Successful', 'success'))
                 flash_messages()
+                parking = Parking.query.filter_by(id=booking.parking_id).first()
+                office = Office.query.filter_by(id=parking.office_id).first()
+                msg = Message(
+                    subject='Parking Booking Successful ✅',
+                    sender=os.getenv('MAIL_EMAIL'),
+                    recipients=[current_user.email]
+                )
+                start = datetime.fromtimestamp(booking.start, tz=pytz.UTC).astimezone(zurich_tz).strftime('%A %Y/%m/%d %H:%M %Z')
+                end = datetime.fromtimestamp(booking.end, tz=pytz.UTC).astimezone(zurich_tz).strftime('%A %Y/%m/%d %H:%M %Z')
+                msg.html = f"""
+                    <html>
+                        <body>
+                            <h3>Booking Details</h3>
+                            <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+                                <tr>
+                                    <th align="left">Booking ID</th>
+                                    <td>{booking.id}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Booking Author</th>
+                                    <td>{booking.reserved_by}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Booking Author ID</th>
+                                    <td>{booking.user_id}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Parking ID</th>
+                                    <td>{booking.parking_id}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Parking Name</th>
+                                    <td>{parking.name}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Office Name</th>
+                                    <td>{office.name}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Booking Start</th>
+                                    <td>{start}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Booking End</th>
+                                    <td>{end}</td>
+                                </tr>
+                            </table>
+                        </body>
+                    </html>
+                    """
+                send_mail(msg)
             else:
                 session['flash_messages'].append(('Booking overlaps with other.', 'error'))
                 flash_messages()
@@ -212,14 +263,69 @@ def room():
                     reserved_by=current_user.name
                 )
                 db.session.add(booking)
+                desk = Desk.query.filter_by(id=booking.desk_id).first()
+                room = Room.query.filter_by(id=desk.room_id).first()
+                office = Office.query.filter_by(id=room.office_id).first()
                 session['flash_messages'].append(('Booking Successful', 'success'))
                 flash_messages()
+                msg = Message(
+                    subject='Desk Booking Successful ✅',
+                    sender=os.getenv('MAIL_EMAIL'),
+                    recipients=[current_user.email]
+                )
+                start = datetime.fromtimestamp(booking.start, tz=pytz.UTC).astimezone(zurich_tz).strftime('%A %Y/%m/%d %H:%M %Z')
+                end = datetime.fromtimestamp(booking.end, tz=pytz.UTC).astimezone(zurich_tz).strftime('%A %Y/%m/%d %H:%M %Z')
+                msg.html = f"""
+                    <html>
+                        <body>
+                            <h3>Booking Details</h3>
+                            <table border="1" cellpadding="5" cellspacing="0" style="border-collapse: collapse;">
+                                <tr>
+                                    <th align="left">Booking ID</th>
+                                    <td>{booking.id}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Booking Author</th>
+                                    <td>{booking.reserved_by}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Booking Author ID</th>
+                                    <td>{booking.user_id}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Desk ID</th>
+                                    <td>{booking.desk_id}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Desk Name</th>
+                                    <td>{desk.name}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Room Name</th>
+                                    <td>{room.name}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Office Name</th>
+                                    <td>{office.name}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Booking Start</th>
+                                    <td>{start}</td>
+                                </tr>
+                                <tr>
+                                    <th align="left">Booking End</th>
+                                    <td>{end}</td>
+                                </tr>
+                            </table>
+                        </body>
+                    </html>
+                    """
+                send_mail(msg)
             else:
                 session['flash_messages'].append(('Booking overlaps with other.', 'error'))
                 flash_messages()
             db.session.commit()
     room_id = request.args.get('room_id')
-
     room = Room.query.filter_by(id=room_id).first()
     desks = Desk.query.filter_by(room_id=room_id).all()
     timezone = request.cookies.get('timezone', 'Europe/Zurich')
