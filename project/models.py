@@ -30,8 +30,8 @@ class Room(db.Model):
     office_id = db.Column(db.Integer, db.ForeignKey('office.id'))
     rows = db.Column(db.Integer)
     columns = db.Column(db.Integer)
-    door_position_x = db.Column(db.Integer)
-    door_position_y = db.Column(db.Integer)
+    door_position_x = db.Column(db.Double)
+    door_position_y = db.Column(db.Double)
 
 
 class Desk(db.Model):

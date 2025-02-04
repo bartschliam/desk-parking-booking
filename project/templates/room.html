@@ -16,6 +16,7 @@
 <button onclick="goBack()" class="button is-secondary">Back</button>
 
 <div class="room-grid">
+<div class="door" style="top: calc({{ room.door_position_x }} * {{ room.rows }}* 20px); left: calc({{ room.door_position_y }} * {{ room.columns }}* 20px);">🚪</div>
     {% for i in range(1, room.rows + 1) %}
         <div class="row">
             {% for j in range(1, room.columns + 1) %}
